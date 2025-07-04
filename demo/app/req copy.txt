@@ -1,8 +1,0 @@
-PIL
-deepface
-fastapi 
-uvicorn 
-jinja2 
-opencv-python-headless 
-numpy
-tf-keras

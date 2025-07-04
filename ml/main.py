@@ -7,14 +7,29 @@ from minio import Minio
 import os
 import time
 import uuid
-client = Minio("localhost:9000",
+
+STORAGE_ACESS_KEY=os.environ.get("STORAGE_ACESS_KEY", "minioadmin")
+STORAGE_SECRET_KEY=os.environ.get("STORAGE_SECRET_KEY", "minioadmin")
+STORAGE_DNS=os.environ.get("STORAGE_DNS", "localhost:9000")
+
+# Wait for MinIO to start up (not ideal for production!)
+time.sleep(5)
+
+client = Minio(STORAGE_DNS,
     secure=False,
-    access_key="minioadmin",
-    secret_key="minioadmin",
+    access_key=STORAGE_ACESS_KEY,
+    secret_key=STORAGE_SECRET_KEY,
 )
 
 app = FastAPI()
 
+@app.get("/test-minio")
+def test_minio():
+    try:
+        buckets = client.list_buckets()
+        return {"buckets": [b.name for b in buckets]}
+    except Exception as e:
+        return {"error": str(e)}
 
 # 1. Expose a post method for getting the faces
 #     Input:  A path on minio with the original picture
@@ -84,10 +99,15 @@ def saveFaces(faces: List[Dict[str, Any]], sourcePath:str,  workDir:str):
     draw = ImageDraw.Draw(image)
 
     ## Creating a rectangle on every face
+    general_image_path = "{workDir}/output_image.jpg".format(workDir=workDir)
     for i in faces:
         rect_coords = (i["facial_area"]["x"], i["facial_area"]["y"], i["facial_area"]["x"] + i["facial_area"]["w"], i["facial_area"]["y"] + i["facial_area"]["h"])
         draw.rectangle(rect_coords, outline="red", width=3)
-    image.save("{workDir}/output_image.jpg".format(workDir=workDir))
+    image.save(general_image_path)
+
+    metadata[general_image_path] = {
+            "generalImae": True
+    }
 
     ## Saving each single face
     for index, face_obj in enumerate(faces):

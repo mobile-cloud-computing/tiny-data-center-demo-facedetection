@@ -1,2 +1,2 @@
 deploy:
-	docker stack deploy --detach=false -c stack.yml demo
+	docker stack deploy --detach=false -c stack.yml demo-3
