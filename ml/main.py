@@ -46,8 +46,6 @@ def extract_faces(base_image_path: str, output_path: str):
 def clean(workDir:str):
     shutil.rmtree(workDir)
 
-
-
 def getWorkingDir()->str:
     batch_id = uuid.uuid4()
     workDir = "./tmp/{batch_id}".format(batch_id=batch_id)
