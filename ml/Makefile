@@ -2,7 +2,7 @@ buildx:
 	docker build --no-cache -t facerecognition --platform linux/arm/v7 .
 
 build:
-	docker build --no-cache -t facerecognition2:6 .
+	docker build --no-cache -t facerecognition2:8 .
 
 
 run:

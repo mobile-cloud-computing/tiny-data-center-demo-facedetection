@@ -54,9 +54,28 @@ def extract_faces(base_image_path: str, output_path: str):
     metadata = saveFaces(faces, sourcePath,  f"{workDir}/output")
     metadata = uploadOutput(metadata, output_path)
     clean(workDir)
-    return metadata
+    return castMetadata(metadata)
     
-    # return metadata
+
+def castMetadata(metadata: Dict) -> Dict:
+    result = []
+
+    for file in metadata:
+        theResult = {
+            "imagePath": file,
+            "generalImage": False,
+            "confidence": 0
+        }
+
+        if "generalImae" in metadata[file]:
+            theResult["generalImage"] = metadata[file]["generalImae"]
+        
+        if "confidence" in metadata[file]:
+            theResult["confidence"] = metadata[file]["confidence"]
+        
+        result.append(theResult)
+    
+    return result
 
 def clean(workDir:str):
     shutil.rmtree(workDir)
