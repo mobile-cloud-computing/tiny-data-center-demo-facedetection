@@ -2,6 +2,7 @@ package ml
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -50,7 +51,15 @@ func (mls *MLService) DetectFaces(ctx context.Context, baseImagePath, outputPath
 	}
 	sb := string(body)
 
+	var (
+		result []*domain.ImageOuput
+	)
+
+	if err := json.Unmarshal(body, &result); err != nil {
+		logger.Err(err).Int("HttpStatus", response.StatusCode).Msg("Error while unmarshaling the body")
+	}
+
 	logger.Info().Int("HttpStatus", response.StatusCode).Msg(sb)
 
-	return nil, nil
+	return result, nil
 }

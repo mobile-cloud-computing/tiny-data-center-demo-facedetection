@@ -1,7 +1,7 @@
 package domain
 
 type ImageOuput struct {
-	imagePath    string
-	generalImage bool
-	confidence   float64
+	ImagePath    string  `json:"imagePath"`
+	GeneralImage bool    `json:"generalImage"`
+	Confidence   float64 `json:"confidence"`
 }

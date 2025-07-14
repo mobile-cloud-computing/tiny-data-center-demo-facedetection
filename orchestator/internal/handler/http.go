@@ -64,11 +64,15 @@ func (hdl *Handler) AnalyzeImage(c *gin.Context) {
 		return
 	}
 
-	hdl.srv.AnalyzeImage(logger.WithContext(c.Request.Context()), requestId, filename)
+	result, err := hdl.srv.AnalyzeImage(logger.WithContext(c.Request.Context()), requestId, filename)
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "pong",
-	})
+	if err != nil {
+		logger.Error().Err(err).Msg("err while creating the image file")
+		c.AbortWithError(500, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, result)
 }
 
 func (hdl *Handler) GetAllImagesAnalyzed(c *gin.Context) {
