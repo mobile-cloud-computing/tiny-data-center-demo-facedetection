@@ -10,6 +10,7 @@ import (
 
 	"github.com/rs/zerolog/log"
 
+	"github.com/JuanGQCadavid/arm7_cloudlet_facedetection_demo/orchestator/internal/domain"
 	"github.com/JuanGQCadavid/arm7_cloudlet_facedetection_demo/orchestator/internal/service"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -75,11 +76,21 @@ func (hdl *Handler) AnalyzeImage(c *gin.Context) {
 
 	// c.JSON(http.StatusOK, result)
 
+	var (
+		smallest = []*domain.ImageOuput{}
+	)
+
+	if len(result) > 1 {
+		smallest = result[1:]
+	}
+
 	c.HTML(http.StatusOK, "result.tmpl", gin.H{
 		"ObjectsDNS":     GetOutboundIP(),
 		"OriginalSource": result[0],
-		"SmallImages":    result[1:],
+		"SmallImages":    smallest,
 	})
+
+	os.RemoveAll(filename)
 }
 
 func (hdl *Handler) GetAllImagesAnalyzed(c *gin.Context) {

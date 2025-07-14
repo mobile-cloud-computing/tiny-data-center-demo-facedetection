@@ -56,7 +56,8 @@ func (mls *MLService) DetectFaces(ctx context.Context, baseImagePath, outputPath
 	)
 
 	if err := json.Unmarshal(body, &result); err != nil {
-		logger.Err(err).Int("HttpStatus", response.StatusCode).Msg("Error while unmarshaling the body")
+		logger.Err(err).Str("Body", sb).Int("HttpStatus", response.StatusCode).Msg("Error while unmarshaling the body")
+		return nil, err
 	}
 
 	logger.Info().Int("HttpStatus", response.StatusCode).Msg(sb)
