@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"os"
 	"strings"
@@ -72,12 +73,18 @@ func (hdl *Handler) AnalyzeImage(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, result)
+	// c.JSON(http.StatusOK, result)
+
+	c.HTML(http.StatusOK, "result.tmpl", gin.H{
+		"ObjectsDNS":     GetOutboundIP(),
+		"OriginalSource": result[0],
+		"SmallImages":    result[1:],
+	})
 }
 
 func (hdl *Handler) GetAllImagesAnalyzed(c *gin.Context) {
 
-	c.HTML(http.StatusOK, "index.tmpl", gin.H{
+	c.HTML(http.StatusOK, "upload.tmpl", gin.H{
 		"title": "Hello from Server-Side Rendering",
 		"name":  "Gin User",
 	})
@@ -89,4 +96,17 @@ func (hdl *Handler) UploadView(c *gin.Context) {
 		"title": "Analyze",
 		"path":  "/upload",
 	})
+}
+
+// Get preferred outbound ip of this machine
+func GetOutboundIP() net.IP {
+	conn, err := net.Dial("udp", "8.8.8.8:80")
+	if err != nil {
+		log.Err(err).Msg("Ups")
+	}
+	defer conn.Close()
+
+	localAddr := conn.LocalAddr().(*net.UDPAddr)
+
+	return localAddr.IP
 }
