@@ -25,15 +25,19 @@ func NewHandler(srv *service.OrchestatorService) *Handler {
 }
 
 func (hdl *Handler) SetRouter(r *gin.Engine) {
+	r.LoadHTMLGlob("internal/handler/templates/*")
+
 	r.GET("/", hdl.GetAllImagesAnalyzed)
-	r.POST("/", hdl.AnalyzeImage)
+
+	r.GET("/upload", hdl.UploadView)
+	r.POST("/upload", hdl.AnalyzeImage)
 }
 
 func (hdl *Handler) AnalyzeImage(c *gin.Context) {
 	var (
 		requestId         = uuid.NewString()
 		logger            = log.With().Str("requestId", requestId).Logger()
-		file, header, err = c.Request.FormFile("upload")
+		file, header, err = c.Request.FormFile("image")
 	)
 
 	if err != nil {
@@ -68,7 +72,17 @@ func (hdl *Handler) AnalyzeImage(c *gin.Context) {
 }
 
 func (hdl *Handler) GetAllImagesAnalyzed(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message": "pong",
+
+	c.HTML(http.StatusOK, "index.tmpl", gin.H{
+		"title": "Hello from Server-Side Rendering",
+		"name":  "Gin User",
+	})
+}
+
+func (hdl *Handler) UploadView(c *gin.Context) {
+
+	c.HTML(http.StatusOK, "upload.tmpl", gin.H{
+		"title": "Analyze",
+		"path":  "/upload",
 	})
 }

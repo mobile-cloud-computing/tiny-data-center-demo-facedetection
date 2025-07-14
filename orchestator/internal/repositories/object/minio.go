@@ -2,6 +2,7 @@ package object
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
@@ -43,4 +44,18 @@ func (repo *MinioRepository) CreateBucketIfNotExist(bucket string) error {
 	}
 
 	return nil
+}
+
+func (repo *MinioRepository) UploadFile(ctx context.Context, localPath, bucketName, objectKey string) (string, error) {
+	var (
+		logger = log.Ctx(ctx)
+	)
+	uploaInfo, err := repo.minioClient.FPutObject(ctx, bucketName, objectKey, localPath, minio.PutObjectOptions{})
+
+	if err != nil {
+		logger.Err(err).Msg("Err while colling Minioclient FPuntObject")
+		return "", err
+	}
+
+	return fmt.Sprintf("%s/%s", uploaInfo.Bucket, uploaInfo.Key), nil
 }

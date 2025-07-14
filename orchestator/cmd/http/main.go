@@ -8,6 +8,7 @@ import (
 
 	"github.com/JuanGQCadavid/arm7_cloudlet_facedetection_demo/orchestator/internal/handler"
 	"github.com/JuanGQCadavid/arm7_cloudlet_facedetection_demo/orchestator/internal/ports"
+	"github.com/JuanGQCadavid/arm7_cloudlet_facedetection_demo/orchestator/internal/repositories/ml"
 	"github.com/JuanGQCadavid/arm7_cloudlet_facedetection_demo/orchestator/internal/repositories/object"
 	"github.com/JuanGQCadavid/arm7_cloudlet_facedetection_demo/orchestator/internal/service"
 	"github.com/gin-gonic/gin"
@@ -18,11 +19,13 @@ const (
 	OBJECT_ACCES_KEY_ENV_NAME        = "object_access_key"
 	OBJECT_SECRET_ACCES_KEY_ENV_NAME = "object_secret_access_key"
 	OBJECT_DNS_ENV_NAME              = "object_dns"
+	ML_ENV_NAME                      = "ml_dns"
 )
 
 var (
 	// Interfaces
 	objectRepository ports.ObjectRepository
+	mlRepository     ports.MlService
 )
 
 func init() {
@@ -44,6 +47,13 @@ func init() {
 	}
 
 	objectRepository, err = object.NewMinioRepository(dns, access, secret)
+
+	mldns, okey := os.LookupEnv(ML_ENV_NAME)
+	if !okey {
+		log.Fatal().Str("env-missing", ML_ENV_NAME).Msg("Missing env variable")
+	}
+
+	mlRepository = ml.NewMLService(mldns)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -54,7 +64,7 @@ func main() {
 
 	var (
 		router = gin.Default()
-		srv    = service.NewService(nil, objectRepository, nil)
+		srv    = service.NewService(nil, objectRepository, mlRepository)
 		hdl    = handler.NewHandler(srv)
 		debug  = flag.Bool("debug", false, "sets log level to debug")
 	)

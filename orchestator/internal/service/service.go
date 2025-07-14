@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"github.com/rs/zerolog/log"
 
@@ -41,9 +43,28 @@ func (srv *OrchestatorService) Init() error {
 	return nil
 }
 
+// Steps:
+
+// 0. Generate an UUID for the image in the object storage
+// 1. Save the image from the path into a object storage
+// 2. Call ML with the path and the expected output folder
+// 3. return the image list from ML.
 func (srv *OrchestatorService) AnalyzeImage(ctx context.Context, requestId, imagePath string) ([]*domain.ImageOuput, error) {
-	logger := log.Ctx(ctx)
+	var (
+		logger = log.Ctx(ctx)
+		aux    = strings.Split(imagePath, ".")
+		ext    = aux[len(aux)-1]
+		// proccessID = uuid.NewString()
+	)
+
 	logger.Debug().Str("Image", imagePath).Msg("Start analyze")
 
-	return nil, nil
+	objectPath, err := srv.objectRepository.UploadFile(ctx, imagePath, srv.baseBucket, fmt.Sprintf("%s/original.%s", requestId, ext))
+
+	if err != nil {
+		logger.Err(err).Msg("Fail uploading the file")
+		return nil, err
+	}
+
+	return srv.mlService.DetectFaces(ctx, objectPath, fmt.Sprintf("%s/%s", srv.baseBucket, requestId))
 }
