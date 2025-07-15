@@ -1,6 +1,6 @@
 module github.com/JuanGQCadavid/arm7_cloudlet_facedetection_demo/orchestator
 
-go 1.24.4
+go 1.24.3
 
 require (
 	github.com/bytedance/sonic v1.13.3 // indirect

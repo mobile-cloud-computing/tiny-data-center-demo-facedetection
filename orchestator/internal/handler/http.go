@@ -59,6 +59,8 @@ func (hdl *Handler) AnalyzeImage(c *gin.Context) {
 		return
 	}
 
+	defer os.RemoveAll(filename)
+
 	defer out.Close()
 	if _, err = io.Copy(out, file); err != nil {
 		logger.Error().Err(err).Msg("err while saving the image ")
@@ -89,8 +91,6 @@ func (hdl *Handler) AnalyzeImage(c *gin.Context) {
 		"OriginalSource": result[0],
 		"SmallImages":    smallest,
 	})
-
-	os.RemoveAll(filename)
 }
 
 func (hdl *Handler) GetAllImagesAnalyzed(c *gin.Context) {
@@ -110,7 +110,26 @@ func (hdl *Handler) UploadView(c *gin.Context) {
 }
 
 // Get preferred outbound ip of this machine
-func GetOutboundIP() net.IP {
+func GetOutboundIP() string {
+
+	// ips, err := net.LookupIP("host.docker.internal")
+
+	// if err != nil {
+	// 	log.Err(err).Msg("Ups")
+	// } else {
+	// 	for _, ip := range ips {
+	// 		fmt.Println("Host IP:", ip)
+	// 		return ip
+	// 	}
+	// }
+
+	publicIp, oks := os.LookupEnv("public_ip")
+
+	if oks {
+		return publicIp
+	}
+
+	// We need to check this
 	conn, err := net.Dial("udp", "8.8.8.8:80")
 	if err != nil {
 		log.Err(err).Msg("Ups")
@@ -119,5 +138,5 @@ func GetOutboundIP() net.IP {
 
 	localAddr := conn.LocalAddr().(*net.UDPAddr)
 
-	return localAddr.IP
+	return localAddr.IP.String()
 }

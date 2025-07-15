@@ -17,7 +17,7 @@ services:
   ml_service:
     depends_on:
       - minio
-    image: facerecognition2:8
+    image: juangonzalout/arm7_cloudlet_ml:2.8
     ports:
       - "8000:8000"
       - "8001:8001"
@@ -25,6 +25,19 @@ services:
       STORAGE_ACESS_KEY: minioadmin
       STORAGE_SECRET_KEY: minioadmin
       STORAGE_DNS: "minio:9000"
+  
+  orchestator:
+    depends_on:
+      - minio
+    image: juangonzalout/arm7_cloudlet_orchestator:1
+    ports:
+      - "8080:8080"
+    environment:
+      object_access_key: minioadmin
+      object_secret_access_key: minioadmin
+      object_dns: "minio:9000"
+      ml_dns: "ml_service:8000"
+      public_ip: "172.17.153.178"
 
 volumes:
   minio_data:
