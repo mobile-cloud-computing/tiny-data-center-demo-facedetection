@@ -5,7 +5,7 @@ deploy:
 
 publish_ml:
 	cd ml \
-	&& docker build --no-cache -t juangonzalout/arm7_cloudlet_ml:${VERSION} . \
+	&& docker buildx build --platform linux/arm/v7 --no-cache -t juangonzalout/arm7_cloudlet_ml:${VERSION} . \
 	&& docker push juangonzalout/arm7_cloudlet_ml:${VERSION} \
 	&& cd ..
 
